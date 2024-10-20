@@ -10,7 +10,7 @@ def strip_spaces_and_comments(tokens: list) -> list:
     return [token for token in tokens if not token.is_whitespace and not isinstance(token, Comment)]
 
 
-def _extract_identifiers(tokens: list):
+def _extract_identifiers(tokens: list) -> list:
     identifiers = []
 
     for token in tokens:
