@@ -44,7 +44,7 @@ class FromClause(SQL_Code):
         super().__init__(tokens)
 
         self.identifiers = _extract_identifiers(self.tokens)
-        self.tables = None      # TO BE IMPLEMENTED
+        self.tables = None      # TODO: TO BE IMPLEMENTED
 
 
 
@@ -81,14 +81,12 @@ class Query(SQL_Code):
                          default_text_options=[messages.TextFormat.Color.RED])
 
     def extract_select(self) -> SelectClause:
-        tokens = self._extract_clause(SQL_Clause.SELECT)
+        tokens = self._extract_clause_tokens(SQL_Clause.SELECT)
         return SelectClause(tokens)
     
-
     def extract_from(self) -> FromClause:
-        tokens = self._extract_clause(SQL_Clause.FROM)
+        tokens = self._extract_clause_tokens(SQL_Clause.FROM)
         return FromClause(tokens)
-    
 
     def extract_where(self) -> WhereClause:
         tokens = []
@@ -100,21 +98,18 @@ class Query(SQL_Code):
         return WhereClause(tokens)
     
     def extract_group_by(self) -> GroupByClause:
-        tokens = self._extract_clause(SQL_Clause.GROUP_BY)
+        tokens = self._extract_clause_tokens(SQL_Clause.GROUP_BY)
         return GroupByClause(tokens)
     
-
     def extract_having(self) -> HavingClause:
-        tokens = self._extract_clause(SQL_Clause.HAVING)
+        tokens = self._extract_clause_tokens(SQL_Clause.HAVING)
         return GroupByClause(tokens)
     
-
     def extract_order_by(self) -> OrderByClause:
-        tokens = self._extract_clause(SQL_Clause.ORDER_BY)
+        tokens = self._extract_clause_tokens(SQL_Clause.ORDER_BY)
         return GroupByClause(tokens)
-    
 
-    def _extract_clause(self, clause: SQL_Clause) -> list:
+    def _extract_clause_tokens(self, clause: SQL_Clause) -> list:
         tokens = []
         collecting = False
 
@@ -129,7 +124,6 @@ class Query(SQL_Code):
                 tokens.append(token)
 
         return tokens
-    
 
     def print_tree(self):
         return self.query._pprint_tree()
