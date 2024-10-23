@@ -5,7 +5,7 @@ from enum import Enum
 
 from dav_tools import messages
 
-from util import strip_spaces_and_comments, _extract_identifiers
+import util
 from misconceptions import Misconceptions
 
 
@@ -20,7 +20,7 @@ class SQL_Clause(Enum):
 
 class SQL_Code:
     def __init__(self, tokens: list):
-        self.tokens = strip_spaces_and_comments(tokens)
+        self.tokens = util.strip_spaces_and_comments(tokens)
 
     def __str__(self):
         return '\n'.join([str(token) for token in self.tokens])
@@ -36,14 +36,14 @@ class SelectClause(SQL_Code):
 
         self.distinct = self.tokens[1].ttype == Keyword and self.tokens[1].value.upper() == 'DISTINCT'
 
-        self.identifiers = _extract_identifiers(self.tokens)
+        self.identifiers = util.extract_identifiers(self.tokens)
 
 
 class FromClause(SQL_Code):
     def __init__(self, tokens):
         super().__init__(tokens)
 
-        self.identifiers = _extract_identifiers(self.tokens)
+        self.identifiers = util.extract_identifiers(self.tokens)
         self.tables = None      # TODO: TO BE IMPLEMENTED
 
 
@@ -71,8 +71,10 @@ class OrderByClause(SQL_Code):
 class Query(SQL_Code):
     def __init__(self, query_text: str):
         self.text = query_text
-        self.query = sqlparse.parse(self.text)[0]
-        super().__init__(self.query.tokens)
+        self.queries = sqlparse.parse(self.text)
+
+        tokens = util.merge_tokens(*self.queries)
+        super().__init__(tokens)
 
     def log_misconception(self, misconception: Misconceptions):
         messages.message(misconception.name,
@@ -126,8 +128,9 @@ class Query(SQL_Code):
         return tokens
 
     def print_tree(self):
-        return self.query._pprint_tree()
+        for q in self.queries:
+            print('-' * 50)
+            q._pprint_tree()
     
     def __str__(self):
         return self.text
-

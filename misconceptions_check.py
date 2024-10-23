@@ -1,4 +1,4 @@
-from sqlparse.tokens import Keyword
+from sqlparse import tokens as ttypes
 
 from misconceptions import Misconceptions
 from query import Query
@@ -77,7 +77,7 @@ def syn_6_common_syntax_error_using_where_twice(query: Query):
 
     count = 0
     for token in tokens:
-        if token.ttype is Keyword and token.value.upper() == 'WHERE':
+        if token.ttype is ttypes.Keyword and token.value.upper() == 'WHERE':
             count += 1
     
     if count > 1:
@@ -139,7 +139,14 @@ def syn_6_common_syntax_error_nonstandard_operators(query: Query):
     return False
 
 def syn_6_common_syntax_error_additional_semicolon(query: Query):
-    return False
+    semicolons = 0
+
+    for token in query.tokens:
+        if token.ttype is ttypes.Punctuation and token.value == ';':
+            semicolons += 1
+
+    if semicolons > 1:
+        query.log_misconception(Misconceptions.SYN_6_COMMON_SYNTAX_ERROR_ADDITIONAL_SEMICOLON)
 
 def sem_1_inconsistent_expression_and_instead_of_or(query: Query):
     return False

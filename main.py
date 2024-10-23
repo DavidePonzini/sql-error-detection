@@ -52,3 +52,4 @@ if __name__ == '__main__':
         messages.info('============= MISCONCEPTIONS =============')
 
     misconceptions_check.syn_6_common_syntax_error_using_where_twice(query)
+    misconceptions_check.syn_6_common_syntax_error_additional_semicolon(query)

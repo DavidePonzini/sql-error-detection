@@ -1,4 +1,5 @@
 from sqlparse.sql import IdentifierList, Identifier, Comment
+from sqlparse import tokens as ttypes
 
 
 def read_query(filepath: str) -> str:
@@ -7,10 +8,27 @@ def read_query(filepath: str) -> str:
 
 
 def strip_spaces_and_comments(tokens: list) -> list:
-    return [token for token in tokens if not token.is_whitespace and not isinstance(token, Comment)]
+    result = []
+
+    for token in tokens:
+        # whitespaces and newlines
+        if token.is_whitespace:
+            continue
+
+        # regular comment in code
+        if isinstance(token, Comment):
+            continue
+
+        # stray comments
+        if token.ttype is ttypes.Comment or (token.ttype is not None and token.ttype.parent is ttypes.Comment):
+            continue
+
+        result.append(token)
+
+    return result
 
 
-def _extract_identifiers(tokens: list) -> list:
+def extract_identifiers(tokens: list) -> list:
     identifiers = []
 
     for token in tokens:
