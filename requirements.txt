@@ -1,0 +1,2 @@
+dav_tools==0.3.1
+sqlparse==0.5.1
