@@ -21,3 +21,10 @@ def _extract_identifiers(tokens: list) -> list:
             identifiers.append(token)
 
     return identifiers
+
+
+def merge_tokens(*tokens) -> list:
+    result = []
+    for token_list in tokens:
+        result += token_list.tokens
+    return result

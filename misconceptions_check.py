@@ -2,6 +2,7 @@ from sqlparse.tokens import Keyword
 
 from misconceptions import Misconceptions
 from query import Query
+import util
 
 
 def syn_1_ambiguous_database_object_omitting_correlation_names(query: Query):
@@ -71,9 +72,8 @@ def syn_6_common_syntax_error_using_where_twice(query: Query):
 
     # merge multiple where clauses into a single one
     #   (if where is used twice in the 'correct' place, we have a single clause, if it is used in two random places, we have two separate clauses)
-    tokens = []
-    for clause in clauses:
-        tokens += clause.tokens
+
+    tokens = util.merge_tokens(*clauses)
 
     count = 0
     for token in tokens:

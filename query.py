@@ -76,7 +76,7 @@ class Query(SQL_Code):
 
     def log_misconception(self, misconception: Misconceptions):
         messages.message(misconception.name,
-                         icon=f'MISCONCEPTION {misconception.value}',
+                         icon=f'MISCONCEPTION {misconception.value:3}',
                          icon_options=[messages.TextFormat.Color.RED],
                          default_text_options=[messages.TextFormat.Color.RED])
 
