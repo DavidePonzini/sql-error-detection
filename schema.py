@@ -46,6 +46,9 @@ class Table:
 
     def __repr__(self):
         return f'{self.name}({self.columns})'
+    
+    def __str__(self):
+        return f'{self.name}({self.columns})'
 
 
 class Schema:

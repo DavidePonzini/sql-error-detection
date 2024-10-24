@@ -2,6 +2,8 @@ from sqlparse.tokens import Keyword
 
 from sql import SQL_Code
 import util
+import schema
+from misconceptions import Misconceptions
 
 
 class SQL_Clause(SQL_Code):
@@ -24,8 +26,28 @@ class FromClause(SQL_Clause):
         super().__init__(query, tokens)
 
         self.identifiers = util.extract_identifiers(self.tokens)
-        self.tables = {}        # TODO: TO BE IMPLEMENTED
+        self.tables = self._load_tables()
 
+        # TODO: check joins
+        # TODO: subqueries and CTEs can be used in FROM clause
+
+    def _load_tables(self) -> dict[str, schema.Table]:
+        tables = {}
+
+        for identifier in self.identifiers:
+            name = identifier.get_name()
+            real_name = identifier.get_real_name()
+
+            avaiable_tables = self.parent.schema.tables
+            if real_name in avaiable_tables:
+                tables[name] = avaiable_tables[real_name]
+            else:
+                tables[name] = None
+
+                # table name does not exist
+                self.parent.log_misconception(Misconceptions.SYN_2_UNDEFINED_DATABASE_OBJECT_UNDEFINED_OBJECT)
+        
+        return tables
 
 class WhereClause(SQL_Clause):
     def __init__(self, query, tokens: list):

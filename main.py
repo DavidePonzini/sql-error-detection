@@ -24,40 +24,55 @@ if __name__ == '__main__':
     script_create = util.read_file(argument_parser.args.table)
     q = query.SelectQuery(script_select, script_create)
 
+
+    sel = q.select_clause
+    fr = q.from_clause
+    wh = q.where_clause
+    gb = q.group_by_clause
+    hav = q.having_clause
+    ob = q.order_by_clause
+
     if argument_parser.args.verbose:
         messages.info('============= SCHEMA =============')
-        print(repr(q.available_tables))
+        print(repr(q.schema))
 
-        messages.info('============= SELECT =============')
-        sel = q.extract_select()
-        print(repr(sel))
-        messages.message(sel.distinct, icon='DISTINCT', icon_options=[messages.TextFormat.Color.BLUE])
-        for identifier in sel.identifiers:
-            messages.message(f'{str(identifier).ljust(30)} {repr(identifier).ljust(50)} {identifier.get_parent_name()}.{identifier.get_real_name()} -> {identifier.get_parent_name()}.{identifier.get_name()}', icon='column', icon_options=[messages.TextFormat.Color.GREEN])
+        if sel is not None:
+            messages.info('============= SELECT =============')
+            print(repr(sel))
+            messages.message(sel.distinct, icon='DISTINCT', icon_options=[messages.TextFormat.Color.BLUE])
+            for identifier in sel.identifiers:
+                messages.message(str(identifier), repr(identifier), f'{identifier.get_parent_name()}.{identifier.get_real_name()} -> {identifier.get_parent_name()}.{identifier.get_name()}',
+                                icon='column', icon_options=[messages.TextFormat.Color.GREEN],
+                                text_min_len=[30, 50])
 
-        messages.info('============= FROM =============')
-        fr = q.extract_from()
-        print(repr(fr))
-        for identifier in fr.identifiers:
-            messages.message(f'{identifier.get_real_name()} -> {identifier.get_name()}', icon='table', icon_options=[messages.TextFormat.Color.GREEN])
+        if fr is not None:
+            messages.info('============= FROM =============')
+            print(repr(fr))
+            for k,v in fr.tables.items():
+                messages.message(k, v,
+                                icon='table', icon_options=[messages.TextFormat.Color.GREEN],
+                                additional_text_options=[[], [messages.TextFormat.Style.DIM]],
+                                text_min_len=[20])
 
-        messages.info('============= WHERE =============')
-        wh = q.extract_where()
-        print(repr(wh))
+        if wh is not None:
+            messages.info('============= WHERE =============')
+            print(repr(wh))
 
-        messages.info('============= GROUP BY =============')
-        gb = q.extract_group_by()
-        print(repr(gb))
+        if gb is not None:
+            messages.info('============= GROUP BY =============')
+            print(repr(gb))
 
-        messages.info('============= HAVING =============')
-        hav = q.extract_having()
-        print(repr(hav))
+        if hav is not None:
+            messages.info('============= HAVING =============')
+            print(repr(hav))
 
-        messages.info('============= ORDER BY =============')
-        ob = q.extract_order_by()
-        print(repr(ob))
+        if ob is not None:
+            messages.info('============= ORDER BY =============')
+            print(repr(ob))
 
         messages.info('============= MISCONCEPTIONS =============')
 
     misconceptions_check.syn_6_common_syntax_error_using_where_twice(q)
     misconceptions_check.syn_6_common_syntax_error_additional_semicolon(q)
+    
+    q.print_misconceptions()
