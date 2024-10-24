@@ -2,7 +2,7 @@ from sqlparse.sql import IdentifierList, Identifier, Comment
 from sqlparse import tokens as ttypes
 
 
-def read_query(filepath: str) -> str:
+def read_file(filepath: str) -> str:
     with open(filepath) as f:
         return f.read()
 

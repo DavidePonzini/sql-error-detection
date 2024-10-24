@@ -13,10 +13,7 @@ db = database.PostgreSQL(
 schema_prefix = 'sql_misconceptions'
 
 
-def setup_schema(create_tables_file: str) -> str:
-        with open(create_tables_file) as f:
-             create_tables = f.read()
-
+def setup_schema(create_tables: str) -> str:
         '''Create a unique schema with the specified tables and return its name'''
         now = datetime.now()
         schema = f'{schema_prefix}_{now.strftime("%Y%m%d%H%M%S%f")}'

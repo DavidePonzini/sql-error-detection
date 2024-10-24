@@ -6,3 +6,6 @@
 - Intersections
 - Unions
 
+# Unsupported features (for all realeses)
+- Queries over multiple schemas
+- Explicit schema specifications in queries
