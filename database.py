@@ -23,10 +23,10 @@ def setup_schema(create_tables_file: str) -> str:
 
         with db.connect() as c:
             c.create_schema(schema)
-            messages.info(f'Created schema "{schema}"')
+            # messages.info(f'Created schema "{schema}"')
             c.set_schema(schema)
             c.execute(create_tables)
-            messages.info('Created tables')
+            # messages.info('Created tables')
             
             c.commit()
 
@@ -35,7 +35,7 @@ def setup_schema(create_tables_file: str) -> str:
 def delete_schema(schema: str):
     with db.connect() as c:
         c.delete_schema(schema)
-        messages.info(f'Deleted schema "{schema}"')
+        # messages.info(f'Deleted schema "{schema}"')
         
         c.commit()
 

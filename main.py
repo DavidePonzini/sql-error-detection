@@ -3,22 +3,7 @@
 from query_select import SelectQuery
 from util import read_query
 import misconceptions_check
-from query_create import *
-
-
-t1 = Table('table1')
-t2 = Table('table2')
-
-c = TableColumn('column1', int, is_primary_key=True)
-t1.add_column(c)
-t1.add_column(TableColumn('column2', str))
-
-t2.add_column(TableColumn('column1', int, is_primary_key=True))
-t2.add_column(TableColumn('column2', str, is_primary_key=True, foreign_key_column=c))
-t2.add_column(TableColumn('column3', int))
-
-tables = [t1, t2]
-
+import tables
 
 
 if __name__ == '__main__':
@@ -30,10 +15,13 @@ if __name__ == '__main__':
 
     argument_parser.set_developer_info('Davide Ponzini', 'davide.ponzini@edu.unige.it')
 
+    if argument_parser.args.table:
+        available_tables = tables.get_tables(argument_parser.args.table)
+        messages.info('Available tables:', ', '.join(available_tables.keys()))
+
     text = read_query(argument_parser.args.file)
     query = SelectQuery(text)
 
-    messages.info(argument_parser.args.file)
 
     if argument_parser.args.verbose:
         messages.info('============= SELECT =============')

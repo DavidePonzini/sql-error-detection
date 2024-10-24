@@ -48,14 +48,15 @@ class Table:
         return f'{self.name}({self.columns})'
 
 
-def get_tables(filepath: str) -> list[Table]:
+def get_tables(filepath: str) -> dict[str, Table]:
     tables = {}
     
     # create the tables on a temporary schema
     schema = database.setup_schema(filepath)
-    tables_list = database.get_tables_in_schema(schema)
 
-    for table_name, table_type in tables_list:
+    for table_name, table_type in database.get_tables_in_schema(schema):
+        assert table_name not in tables, 'duplicate table'
+        
         table = Table(table_name)
         tables[table_name] = table
 
