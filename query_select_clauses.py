@@ -16,7 +16,7 @@ class SelectClause(SQL_Clause):
     def __init__(self, query, tokens: list):
         super().__init__(query, tokens)
 
-        self.distinct = self.tokens[1].ttype == Keyword and self.tokens[1].value.upper() == 'DISTINCT'
+        self.is_distinct = self.tokens[1].ttype == Keyword and self.tokens[1].value.upper() == 'DISTINCT'
 
         self.identifiers = util.extract_identifiers(self.tokens)
 
@@ -39,6 +39,10 @@ class FromClause(SQL_Clause):
             real_name = identifier.get_real_name()
 
             avaiable_tables = self.parent.schema.tables
+            if name in tables:
+                # multiple definitions for the same table
+                self.parent.log_misconception(Misconceptions.SYN_1_AMBIGUOUS_DATABASE_OBJECT_OMITTING_CORRELATION_NAMES)
+
             if real_name in avaiable_tables:
                 tables[name] = avaiable_tables[real_name]
             else:

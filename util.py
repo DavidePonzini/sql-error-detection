@@ -2,6 +2,17 @@ from sqlparse.sql import IdentifierList, Identifier, Comment
 from sqlparse import tokens as ttypes
 
 
+# Sentinel object to distinguish uninitialized state
+class Undefined:
+    def __repr__(self):
+        return 'UNDEFINED'
+    
+    def __str__(self):
+        return 'UNDEFINED'
+
+UNDEFINED = Undefined()
+
+
 def read_file(filepath: str) -> str:
     with open(filepath) as f:
         return f.read()

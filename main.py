@@ -39,7 +39,7 @@ if __name__ == '__main__':
         if sel is not None:
             messages.info('============= SELECT =============')
             print(repr(sel))
-            messages.message(sel.distinct, icon='DISTINCT', icon_options=[messages.TextFormat.Color.BLUE])
+            messages.message(sel.is_distinct, icon='DISTINCT', icon_options=[messages.TextFormat.Color.BLUE])
             for identifier in sel.identifiers:
                 messages.message(str(identifier), repr(identifier), f'{identifier.get_parent_name()}.{identifier.get_real_name()} -> {identifier.get_parent_name()}.{identifier.get_name()}',
                                 icon='column', icon_options=[messages.TextFormat.Color.GREEN],
