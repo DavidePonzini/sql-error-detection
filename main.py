@@ -34,7 +34,7 @@ if __name__ == '__main__':
 
     if argument_parser.args.verbose:
         messages.info('============= SCHEMA =============')
-        print(repr(q.schema))
+        print(repr(q.schema_full))
 
         if sel is not None:
             messages.info('============= SELECT =============')
@@ -48,7 +48,7 @@ if __name__ == '__main__':
         if fr is not None:
             messages.info('============= FROM =============')
             print(repr(fr))
-            for k,v in fr.tables.items():
+            for k,v in fr.schema.items():
                 messages.message(k, v,
                                 icon='table', icon_options=[messages.TextFormat.Color.GREEN],
                                 additional_text_options=[[], [messages.TextFormat.Style.DIM]],

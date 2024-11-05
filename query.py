@@ -3,7 +3,6 @@ from sqlparse.tokens import Keyword, DML
 from sqlparse.sql import Where
 
 import util
-from util import UNDEFINED
 from sql import SQL_Code
 from query_select_clauses import *
 from misconceptions import Misconceptions
@@ -13,6 +12,13 @@ from dav_tools import messages
 
 
 class Query(SQL_Code):
+    """
+    Represents a generic SQL query.
+
+    Attributes:
+        text (str): The text of the SQL query.
+        queries (list): Parsed SQL queries from the input text.
+    """
     def __init__(self, query_text: str):
         self.text = query_text
         self.queries = sqlparse.parse(self.text)
@@ -22,11 +28,25 @@ class Query(SQL_Code):
 
 
 class SelectQuery(Query):
+    """
+    Represents a SELECT SQL query with various clauses and associated schema.
+
+    Attributes:
+        schema (Schema): The database schema for the query.
+        misconceptions (set): A set of detected misconceptions.
+        from_clause (FromClause | None): The FROM clause of the query.
+        where_clause (WhereClause | None): The WHERE clause of the query.
+        group_by_clause (GroupByClause | None): The GROUP BY clause of the query.
+        having_clause (HavingClause | None): The HAVING clause of the query.
+        order_by_clause (OrderByClause | None): The ORDER BY clause of the query.
+        select_clause (SelectClause | None): The SELECT clause of the query.
+    """
     def __init__(self, query_text: str, schema_filepath: str):
         super().__init__(query_text)
 
-        self.schema = schema.Schema(schema_filepath)
-        self.misconceptions = set()
+        self.schema_full = schema.Schema(schema_filepath)
+        self.schema_selected = schema.Schema()
+        self.misconceptions = dict()
 
         # sql clauses - order of initialization is important
         self.from_clause        = self._extract_from()
@@ -36,11 +56,22 @@ class SelectQuery(Query):
         self.order_by_clause    = self._extract_order_by()
         self.select_clause      = self._extract_select()
 
-    def log_misconception(self, misconception: Misconceptions):
+    def log_misconception(self, misconception: Misconceptions, additional_data = None):
+        """
+        Logs a misconception related to the query if not already logged.
+
+        Args:
+            misconception (Misconceptions): The misconception to log.
+        """
         if misconception not in self.misconceptions:
-            self.misconceptions.add(misconception)
+            self.misconceptions[misconception] = []
+
+        self.misconceptions[misconception].append(additional_data)
 
     def print_misconceptions(self):
+        """
+        Prints the list of misconceptions if any are detected; otherwise, prints a success message.
+        """
         if len(self.misconceptions) == 0:
             messages.success('No misconceptions detected')
             return
@@ -52,6 +83,12 @@ class SelectQuery(Query):
                             default_text_options=[messages.TextFormat.Color.RED])
 
     def _extract_select(self) -> SelectClause | None:
+        """
+        Extracts and returns the SELECT clause from the query.
+
+        Returns:
+            SelectClause | None: The SELECT clause if found, otherwise None.
+        """
         tokens = self._extract_clause_tokens('SELECT')
 
         if len(tokens) > 0:
@@ -59,6 +96,12 @@ class SelectQuery(Query):
         return None
     
     def _extract_from(self) -> FromClause | None:
+        """
+        Extracts and returns the FROM clause from the query.
+
+        Returns:
+            FromClause | None: The FROM clause if found, otherwise None.
+        """
         tokens = self._extract_clause_tokens('FROM')
 
         if len(tokens) > 0:
@@ -66,6 +109,12 @@ class SelectQuery(Query):
         return None
 
     def _extract_where(self) -> WhereClause | None:
+        """
+        Extracts and returns the WHERE clause from the query.
+
+        Returns:
+            WhereClause | None: The WHERE clause if found, otherwise None.
+        """
         tokens = []
 
         for token in self.tokens:
@@ -77,6 +126,12 @@ class SelectQuery(Query):
         return None
     
     def _extract_group_by(self) -> GroupByClause | None:
+        """
+        Extracts and returns the GROUP BY clause from the query.
+
+        Returns:
+            GroupByClause | None: The GROUP BY clause if found, otherwise None.
+        """
         tokens = self._extract_clause_tokens('GROUP BY')
 
         if len(tokens) > 0:
@@ -84,6 +139,12 @@ class SelectQuery(Query):
         return None
     
     def _extract_having(self) -> HavingClause | None:
+        """
+        Extracts and returns the HAVING clause from the query.
+
+        Returns:
+            HavingClause | None: The HAVING clause if found, otherwise None.
+        """
         tokens = self._extract_clause_tokens('HAVING')
 
         if len(tokens) > 0:
@@ -91,6 +152,12 @@ class SelectQuery(Query):
         return None
     
     def _extract_order_by(self) -> OrderByClause | None:
+        """
+        Extracts and returns the ORDER BY clause from the query.
+
+        Returns:
+            OrderByClause | None: The ORDER BY clause if found, otherwise None.
+        """
         tokens = self._extract_clause_tokens('ORDER BY')
 
         if len(tokens) > 0:
@@ -98,6 +165,15 @@ class SelectQuery(Query):
         return None
 
     def _extract_clause_tokens(self, clause: str) -> list:
+        """
+        Extracts tokens associated with a specific clause in the SQL query.
+
+        Args:
+            clause (str): The name of the clause (e.g., 'SELECT', 'WHERE').
+
+        Returns:
+            list: Tokens associated with the clause.
+        """
         tokens = []
         collecting = False
 
@@ -114,9 +190,9 @@ class SelectQuery(Query):
         return tokens
 
     def print_tree(self):
+        """
+        Prints a hierarchical tree of the query structure for debugging and analysis.
+        """
         for q in self.queries:
             print('-' * 50)
             q._pprint_tree()
-    
-    def __str__(self):
-        return self.text
