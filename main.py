@@ -2,7 +2,6 @@
 
 import query
 import util
-import misconceptions_check
 
 
 # debugging
@@ -71,8 +70,4 @@ if __name__ == '__main__':
             print(repr(ob))
 
         messages.info('============= MISCONCEPTIONS =============')
-
-    misconceptions_check.syn_6_common_syntax_error_using_where_twice(q)
-    misconceptions_check.syn_6_common_syntax_error_additional_semicolon(q)
-    
     q.print_misconceptions()

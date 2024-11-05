@@ -1,4 +1,6 @@
 from sqlparse.tokens import Keyword
+from sqlparse import tokens as ttypes
+
 from sql import SQL_Code
 import util
 import schema
@@ -102,6 +104,29 @@ class FromClause(SelectQueryClause):
 class WhereClause(SelectQueryClause):
     def __init__(self, query, tokens: list):
         super().__init__(query, tokens)
+
+    def _check_multiple_where(self):
+        clauses = self.tokens
+        
+        if len(clauses) == 0:
+            return
+        
+        if len(clauses) > 2:
+            # TODO: where used twice, most likely not in the right place!
+            pass
+
+        # merge multiple where clauses into a single one
+        #   (if where is used twice in the 'correct' place, we have a single clause, if it is used in two random places, we have two separate clauses)
+
+        tokens = util.merge_tokens(*clauses)
+
+        count = 0
+        for token in tokens:
+            if token.ttype is ttypes.Keyword and token.value.upper() == 'WHERE':
+                count += 1
+        
+        if count > 1:
+            self.parent.log_misconception(Misconceptions.SYN_6_COMMON_SYNTAX_ERROR_USING_WHERE_TWICE)
 
 
 class GroupByClause(SelectQueryClause):

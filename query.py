@@ -1,6 +1,7 @@
 import sqlparse
 from sqlparse.tokens import Keyword, DML
 from sqlparse.sql import Where
+from typing import Any
 
 import util
 from sql import SQL_Code
@@ -18,45 +19,34 @@ class Query(SQL_Code):
     Attributes:
         text (str): The text of the SQL query.
         queries (list): Parsed SQL queries from the input text.
+        misconceptions (dict): Detected misconceptions.
+        misconceptions (dict): Detected misconceptions.
     """
     def __init__(self, query_text: str):
         self.text = query_text
         self.queries = sqlparse.parse(self.text)
+        self.misconceptions: dict[Misconceptions, Any] = dict()
 
         tokens = util.merge_tokens(*self.queries)
         super().__init__(tokens)
 
+        self._check_multiple_semicolons()
 
-class SelectQuery(Query):
-    """
-    Represents a SELECT SQL query with various clauses and associated schema.
+    def _check_multiple_semicolons(self):
+        semicolons = 0
 
-    Attributes:
-        schema (Schema): The database schema for the query.
-        misconceptions (set): A set of detected misconceptions.
-        from_clause (FromClause | None): The FROM clause of the query.
-        where_clause (WhereClause | None): The WHERE clause of the query.
-        group_by_clause (GroupByClause | None): The GROUP BY clause of the query.
-        having_clause (HavingClause | None): The HAVING clause of the query.
-        order_by_clause (OrderByClause | None): The ORDER BY clause of the query.
-        select_clause (SelectClause | None): The SELECT clause of the query.
-    """
-    def __init__(self, query_text: str, schema_filepath: str):
-        super().__init__(query_text)
+        # we may have multiple queries if semicolon in main query
+        #   or we may have a single query if semicolon in subquery
 
-        self.schema_full = schema.Schema(schema_filepath)
-        self.schema_selected = schema.Schema()
-        self.misconceptions = dict()
+        for q in self.queries:
+            for token in q.tokens:
+                if token.ttype is ttypes.Punctuation and token.value == ';':
+                    semicolons += 1
 
-        # sql clauses - order of initialization is important
-        self.from_clause        = self._extract_from()
-        self.where_clause       = self._extract_where()
-        self.group_by_clause    = self._extract_group_by()
-        self.having_clause      = self._extract_having()
-        self.order_by_clause    = self._extract_order_by()
-        self.select_clause      = self._extract_select()
-
-    def log_misconception(self, misconception: Misconceptions, additional_data = None):
+        if semicolons > 1:
+            self.log_misconception(Misconceptions.SYN_6_COMMON_SYNTAX_ERROR_ADDITIONAL_SEMICOLON)
+    
+    def log_misconception(self, misconception: Misconceptions, additional_data: Any | None = None):
         """
         Logs a misconception related to the query if not already logged.
 
@@ -81,6 +71,36 @@ class SelectQuery(Query):
                             icon=f'MISCONCEPTION {misconception.value:3}',
                             icon_options=[messages.TextFormat.Color.RED],
                             default_text_options=[messages.TextFormat.Color.RED])
+
+
+
+
+class SelectQuery(Query):
+    """
+    Represents a SELECT SQL query with various clauses and associated schema.
+
+    Attributes:
+        schema (Schema): The database schema for the query.
+        from_clause (FromClause | None): The FROM clause of the query.
+        where_clause (WhereClause | None): The WHERE clause of the query.
+        group_by_clause (GroupByClause | None): The GROUP BY clause of the query.
+        having_clause (HavingClause | None): The HAVING clause of the query.
+        order_by_clause (OrderByClause | None): The ORDER BY clause of the query.
+        select_clause (SelectClause | None): The SELECT clause of the query.
+    """
+    def __init__(self, query_text: str, schema_filepath: str):
+        super().__init__(query_text)
+
+        self.schema_full = schema.Schema(schema_filepath)
+        self.schema_selected = schema.Schema()
+
+        # sql clauses - order of initialization is important
+        self.from_clause        = self._extract_from()
+        self.where_clause       = self._extract_where()
+        self.group_by_clause    = self._extract_group_by()
+        self.having_clause      = self._extract_having()
+        self.order_by_clause    = self._extract_order_by()
+        self.select_clause      = self._extract_select()
 
     def _extract_select(self) -> SelectClause | None:
         """
