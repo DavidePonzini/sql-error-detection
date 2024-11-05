@@ -1,2 +1,2 @@
-dav_tools==0.3.1
-sqlparse==0.5.1
+dav_tools>=0.3.3
+sqlparse>=0.5.1
