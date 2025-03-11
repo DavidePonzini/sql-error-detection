@@ -16,9 +16,3 @@ if __name__ == '__main__':
     script_create = util.read_file(argument_parser.args.table)
 
     query.SelectQuery(script_select, script_create).print_misconceptions()
-
-
-else:   # debugging
-    script_select = util.read_file('test.sql')
-    script_create = util.read_file('test_create.sql')
-    q = query.SelectQuery(script_select, script_create)
